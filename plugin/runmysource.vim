@@ -1,7 +1,7 @@
 " File:        runmysource.vim
 " Description: Execute code with runmysource
 " Author:      Diego Rubin <rubin.diego@gmail.com>
-" Licence:     GLPV2
+" Licence:     GPL v2
 " Version:     0.0.1
 
 if exists('g:loaded_vimrunmysource') || &cp
@@ -13,24 +13,46 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 " Options
-if !exists('g:vimrunmysource_key')
-  let g:vimrunmysource_key = ''
-endif
-
 if !exists('g:vimrunmysource_keymap')
   let g:vimrunmysource_keymap = 1
 endif
 
-function! s:RunMySource()
-  let l:filename = @%
+function! s:RunMySource(...)
+
+  if a:0 == 0
+    echom "Needs a language"
+    return
+  endif
+
+  let l:language = a:1
+
+  if !exists('g:runmysource_input')
+    let l:runmysource_input = ''
+  else
+    let l:runmysource_input = system("cat " . g:runmysource_input)
+    echom l:runmysource_input
+  endif
+
+  if !exists('g:vimrunmysource_key')
+    echom "You need to set the variable g:vimrunmysourcekey"
+  else
+    let l:curl_command = 'curl -s -X POST http://executor.runmysource.com/ --data-urlencode "key=' . g:vimrunmysource_key . '"' . ' --data-urlencode "source=' . join(getline(1,'$'), "\n") . '" --data-urlencode "language=' . l:language . '" --data-urlencode "input=' . l:runmysource_input . '"'
+
+    let l:result = split(system(l:curl_command), "\n")
+    cexpr l:result
+    copen
+
+  endif
+
 endfunction
 
-command! RunMySource :call <SID>RunMySource()
+function! s:RunMySourceInput()
+  let g:runmysource_input = @%
+  echom g:runmysource_input
+endfunction
 
-" Shortcuts for RunMySource
-if g:vimrunmysource_keymap == 1
-  nmap <Leader>rms :RunMySource<CR>
-endif
+command! -nargs=* RunMySource :execute s:RunMySource(<f-args>)
+command! RunMySourceInput :execute s:RunMySourceInput()
 
 let &cpo = s:save_cpo
 
