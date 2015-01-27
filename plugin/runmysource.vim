@@ -36,7 +36,9 @@ function! s:RunMySource(...)
   if !exists('g:vimrunmysource_key')
     echom "You need to set the variable g:vimrunmysourcekey"
   else
-    let l:curl_command = 'curl -s -X POST http://executor.runmysource.com/ --data-urlencode "key=' . g:vimrunmysource_key . '"' . ' --data-urlencode "source=' . join(getline(1,'$'), "\n") . '" --data-urlencode "language=' . l:language . '" --data-urlencode "input=' . l:runmysource_input . '"'
+    let l:source = substitute(join(getline(1,'$'), "\n"), '"', '\\"', 'g')
+    let l:curl_command = 'curl -s -X POST http://executor.runmysource.com/ --data-urlencode "key=' . g:vimrunmysource_key . '"' . ' --data-urlencode "source=' . l:source . '" --data-urlencode "language=' . l:language . '" --data-urlencode "input=' . l:runmysource_input . '"'
+    echom l:curl_command
 
     let l:result = split(system(l:curl_command), "\n")
     cexpr l:result
