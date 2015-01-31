@@ -29,8 +29,7 @@ function! s:RunMySource(...)
   if !exists('g:runmysource_input')
     let l:runmysource_input = ''
   else
-    let l:runmysource_input = system("cat " . g:runmysource_input)
-    echom l:runmysource_input
+    let l:runmysource_input = substitute(system("cat " . g:runmysource_input), '"', '\\"', 'g')
   endif
 
   if !exists('g:vimrunmysource_key')
